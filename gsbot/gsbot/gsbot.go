@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -73,6 +74,22 @@ func main() {
 			fmt.Printf("Error: %v", e)
 		case *steam.LoggedOnEvent:
 			client.Social.SetPersonaState(steamlang.EPersonaState_Online)
+			flags := steamlang.EClientPersonaStateFlag_PlayerName | steamlang.EClientPersonaStateFlag_Presence | steamlang.EClientPersonaStateFlag_SourceID
+			client.Social.RequestFriendInfo(76561198340242486,flags)
+
+
+		case *steam.TradeProposedEvent:
+			fmt.Println(e.RequestId)
+			fmt.Println(e.Other)
+		case *steam.PersonaStateEvent:
+			f,err:=client.Social.Friends.ById(76561198340242486)
+			if err!=nil{
+				fmt.Println(err)
+			}
+			fmt.Println("send msg")
+			b,_:=json.MarshalIndent(f,""," ")
+			s:=fmt.Sprintf("I'm bot, your steam info is :%s",string(b))
+			client.Social.SendMessage(f.SteamId,steamlang.EChatEntryType_ChatMsg,s)
 		}
 	}
 }
